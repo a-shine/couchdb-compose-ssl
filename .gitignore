@@ -1,0 +1,11 @@
+# Compose file holding secret/sensitive settings and evironment variables
+docker-compose.secret.yml
+
+# Ignore all the couch data
+couchdb_data/
+
+20-custom-couch-conf.ini
+
+nginx-conf/
+
+config.json
