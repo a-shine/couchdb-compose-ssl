@@ -1,5 +1,15 @@
+# letsencrypt-docker-compose configurations
 config.json
 html/
 nginx-conf/
 !nginx-conf/conf.d/upstreams.conf
 !nginx-conf/conf.d/includes/
+
+# Compose file holding secret/sensitive settings and evironment variables
+docker-compose.secret.yml
+
+# Persistent CouchDB data
+couchdb_data/
+
+# Custom CouchDB configuration overrides
+20-custom-couch-conf.ini

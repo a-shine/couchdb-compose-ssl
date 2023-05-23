@@ -34,7 +34,7 @@ services:
       - "80:80"
       - "443:443"
     healthcheck:
-      test: ["CMD", "nc", "-z", "nginx", "80"]
+      test: [ "CMD", "nc", "-z", "nginx", "80" ]
       interval: 30s
       timeout: 30s
       start_period: 30s
@@ -54,7 +54,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'test -n "$$(ls -A /etc/letsencrypt/live/)" || test "$$DRY_RUN" == "true" || exit 1',
+          'test -n "$$(ls -A /etc/letsencrypt/live/)" || test "$$DRY_RUN" == "true" || exit 1'
         ]
       interval: 30s
       timeout: 30s
@@ -79,17 +79,17 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Remove if you don't use PHP
-  php-fpm:
-    image: php:fpm-alpine
+  # CouchDB backend
+  couchdb:
+    image: couchdb:3.3
+    restart: always
+    ports:
+      # SSL port
+      # - 6984:6984
+      - 5984:5984
     volumes:
-      - ./html:/var/www/html:ro
-
-  # Replace with your backend image or remove
-  example-backend:
-    build: ./examples/nodejs-backend
-    image: evgeniy-khyst/expressjs-helloworld
-    restart: unless-stopped
+      - ./couchdb_data:/opt/couchdb/data
+      - ./10-custom-couch-conf.ini:/opt/couchdb/etc/local.d/10-custom-couch-conf.ini
 
 volumes:
   nginx_conf_ssl:
