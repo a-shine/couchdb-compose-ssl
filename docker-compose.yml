@@ -84,8 +84,6 @@ services:
     image: couchdb:3.3
     restart: always
     ports:
-      # SSL port
-      # - "6984:6984"
       - 5984:5984
     volumes:
       - ./couchdb_data:/opt/couchdb/data
