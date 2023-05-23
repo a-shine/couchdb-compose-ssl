@@ -90,6 +90,7 @@ services:
     volumes:
       - ./couchdb_data:/opt/couchdb/data
       - ./10-custom-couch-conf.ini:/opt/couchdb/etc/local.d/10-custom-couch-conf.ini
+  # TODO: Oolong web server (this would prevent need for CORS)
 
 volumes:
   nginx_conf_ssl:
