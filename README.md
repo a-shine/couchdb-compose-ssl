@@ -1,34 +1,57 @@
+# CouchDB compose configuration with automated SSL certificates
+
+This repository contains a Docker Compose configuration, which automatically
+obtains and renews Let's Encrypt SSL/TLS certificates for a CouchDB instance.
+
+The repository is a fork of [evgeniy-khist/letsencrypt-docker-compose](https://github.com/evgeniy-khist/letsencrypt-docker-compose).
+
+## Usage
+
+1. Clone this repository on the server where you want to run CouchDB.
+2. Add CouchDB override configuration and docker-compose.secret.yml (storing production secrets).
+3. Setup SLL certificates with NGINx and Let's Encrypt using the instructions below.
+4. Run CouchDB with SSL
+
+   ```bash
+    docker-compose -f docker-compose.yml -f docker-compose.secret.yml up -d
+   ```
+
+For convenience, the original README is included below.
+
 # <a id="0"></a>letsencrypt-docker-compose
 
-- [Overview](#1)
-- [Initial setup](#2)
-  - [Installing](#2-1)
-  - [Step 1 - Create DNS records](#2-2)
-  - [Step 2 - Configure Nginx](#2-3)
-    - [Serving static content](#2-3-1)
-    - [Reverse proxy](#2-3-2)
-      - [Single Docker Compose project](#2-3-2-1)
-      - [Multiple Docker Compose projects](#2-3-2-2)
-    - [PHP-FPM](#2-3-3)
-  - [Step 3 - Perform an initial setup using the CLI tool](#2-4)
-  - [Step 4 - Start the services](#2-5)
-  - [Step 5 - Verify that HTTPS works with the test certificates](#2-6)
-  - [Step 6 - Switch to a Let's Encrypt production environment](#2-7)
-  - [Step 7 - Verify that HTTPS works with the production certificates](#2-8)
-- [Updating](#3)
-- [Adding new domains without downtime](#4)
-  - [Step 1 - Create new DNS records](#4-1)
-  - [Step 2 - Copy static content or define upstream service](#4-2)
-  - [Step 3 - Update the configuration using the CLI tool](#4-3)
-  - [Step 4 - Verify that HTTPS works](#4-4)
-- [Removing existing domains without downtime](#5)
-- [Manually renewing all Let's Encrypt certificates](#6)
-- [Running on a local machine not directed to by DNS records](#7)
-  - [Step 1 - Perform an initial setup using the CLI tool](#7-1)
-  - [Step 2 - Start the services in dry run mode](#7-2)
-- [Advanced Nginx configuration](#8)
-- [Running Docker containers as a non-root user](#9)
-- [SSL configuration for A+ rating](#10)
+- [CouchDB compose configuration with automated SSL certificates](#couchdb-compose-configuration-with-automated-ssl-certificates)
+  - [Usage](#usage)
+- [letsencrypt-docker-compose](#letsencrypt-docker-compose)
+  - [Overview](#overview)
+  - [Initial setup](#initial-setup)
+    - [Installing](#installing)
+    - [Step 1 - Create DNS records](#step-1---create-dns-records)
+    - [Step 2 - Configure Nginx](#step-2---configure-nginx)
+      - [Serving static content](#serving-static-content)
+      - [Reverse proxy](#reverse-proxy)
+        - [Single Docker Compose project](#single-docker-compose-project)
+        - [Multiple Docker Compose projects](#multiple-docker-compose-projects)
+      - [PHP-FPM](#php-fpm)
+    - [Step 3 - Perform an initial setup using the CLI tool](#step-3---perform-an-initial-setup-using-the-cli-tool)
+    - [Step 4 - Start the services](#step-4---start-the-services)
+    - [Step 5 - Verify that HTTPS works with the test certificates](#step-5---verify-that-https-works-with-the-test-certificates)
+    - [Step 6 - Switch to a Let's Encrypt production environment](#step-6---switch-to-a-lets-encrypt-production-environment)
+    - [Step 7 - Verify that HTTPS works with the production certificates](#step-7---verify-that-https-works-with-the-production-certificates)
+  - [Updating](#updating)
+  - [Adding new domains without downtime](#adding-new-domains-without-downtime)
+    - [Step 1 - Create new DNS records](#step-1---create-new-dns-records)
+    - [Step 2 - Copy static content or define upstream service](#step-2---copy-static-content-or-define-upstream-service)
+    - [Step 3 - Update the configuration using the CLI tool](#step-3---update-the-configuration-using-the-cli-tool)
+    - [Step 4 - Verify that HTTPS works](#step-4---verify-that-https-works)
+  - [Removing existing domains without downtime](#removing-existing-domains-without-downtime)
+  - [Manually renewing all Let's Encrypt certificates](#manually-renewing-all-lets-encrypt-certificates)
+  - [Running on a local machine not directed to by DNS records](#running-on-a-local-machine-not-directed-to-by-dns-records)
+    - [Step 1 - Perform an initial setup using the CLI tool](#step-1---perform-an-initial-setup-using-the-cli-tool)
+    - [Step 2 - Start the services in dry run mode](#step-2---start-the-services-in-dry-run-mode)
+  - [Advanced Nginx configuration](#advanced-nginx-configuration)
+  - [Running Docker containers as a non-root user](#running-docker-containers-as-a-non-root-user)
+  - [SSL configuration for A+ rating](#ssl-configuration-for-a-rating)
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
@@ -36,7 +59,7 @@
 
 Set up Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
 
-This repository contains a Docker Compose project, which automatically obtains and renews free Let's Encrypt SSL/TLS certificates 
+This repository contains a Docker Compose project, which automatically obtains and renews free Let's Encrypt SSL/TLS certificates
 and sets up HTTPS in Nginx for multiple domain names and a simple CLI configuration management tool.
 
 You can run Nginx and set up HTTPS (`https://`) and WebSocket Secure (`wss://`) with Let's Encrypt TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using Docker Compose and _letsencrypt-docker-compose_ interactive CLI tool.
