@@ -10,6 +10,3 @@ docker-compose.secret.yml
 
 # Persistent CouchDB data
 couchdb_data/
-
-# Custom CouchDB configuration overrides
-20-custom-couch-conf.ini

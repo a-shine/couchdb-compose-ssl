@@ -79,19 +79,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # CouchDB backend
-  couchdb:
-    image: couchdb:3.3
-    restart: always
-    ports:
-      # SSL port
-      # - 6984:6984
-      - 5984:5984
-    volumes:
-      - ./couchdb_data:/opt/couchdb/data
-      - ./10-custom-couch-conf.ini:/opt/couchdb/etc/local.d/10-custom-couch-conf.ini
-  # TODO: Oolong web server (this would prevent need for CORS)
-
 volumes:
   nginx_conf_ssl:
   letsencrypt_certs:

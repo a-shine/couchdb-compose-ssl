@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+
+  # CouchDB backup service
+  # couchdb-backup:
+  #   image: imageName
+
+  # CouchDB backend
+  couchdb:
+    image: couchdb:3.3
+    restart: always
+    ports:
+      - 5984:5984
+    # networks:
+    #   - letsencrypt-docker-compose
+    volumes:
+      - ./couchdb_data:/opt/couchdb/data
+      - ./10-custom-couch-conf.ini:/opt/couchdb/etc/local.d/10-custom-couch-conf.ini
+
+  # Oolong frontend server
+  oolong-frontend:
+    image: ashinebourne/oolong_front:latest
+    restart: always
+    ports:
+      - 8080:80
+    # networks:
+    #   - letsencrypt-docker-compose
+
+    # networks:
+    #   # Oolong specific upstream servers are defined in this seperate file from the 
+    #   # core letsencrypt docker compose (to avoid merge conflicts with the forked 
+    #   # repo). Here we configure it to join the letsencrypt-docker-compose_default 
+    #   # network created by main docker-compose.yml, so Nginx is able to forward 
+    #   # requests to the upstream service.
+    #   letsencrypt-docker-compose:
+    #     name: letsencrypt-docker-compose_default
+    #     external: true
