@@ -25,7 +25,8 @@ server {
 
     include /etc/nginx/conf.d/includes/hsts.conf;
 
-
+    {{!-- # https://docs.couchdb.org/en/stable/best-practices/reverse-proxies.html#reverse-proxying-couchdb-in-a-subdirectory-with-nginx --}}
+    {{!-- # https://github.com/apache/couchdb-fauxton/issues/1199 --}}
     location /couch {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
