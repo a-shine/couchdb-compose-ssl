@@ -1,20 +1,58 @@
-# CouchDB compose configuration with automated SSL certificates
+# Hosting Oolong
 
-This repository contains a Docker Compose configuration, which automatically
-obtains and renews Let's Encrypt SSL/TLS certificates for a CouchDB instance.
+This repository contains a Docker Compose configuration to serve and self-host
+the [a-shine/oolong](https://github.com/a-shine/oolong) application.
 
-The repository is a fork of [evgeniy-khist/letsencrypt-docker-compose](https://github.com/evgeniy-khist/letsencrypt-docker-compose).
+This configuration:
 
-## Usage
+- Provides a CLI tool to easily configure a custom domain
+- Automatically obtains and renews Let's Encrypt SSL/TLS certificates for the
+  domain
+- Configures an NGINX server to be used as a reverse proxy for the Oolong
+  frontend and CouchDB backend (all orchestrated by Docker Compose)
 
-1. Clone this repository on the server where you want to run CouchDB.
-2. Add CouchDB override configuration and docker-compose.secret.yml (storing production secrets).
-3. Setup SLL certificates with NGINx and Let's Encrypt using the instructions below.
-4. Run CouchDB with SSL
+The repository is built on the fantastic work published at:
+[evgeniy-khist/letsencrypt-docker-compose](https://github.com/evgeniy-khist/letsencrypt-docker-compose).
+
+## Setup
+
+1. Clone this repository on the server where you want to host Oolong (usually a
+   VPS with a static hostname/IP).
+2. Create and configure DNS records to associate the domain name with your
+   machine (typically using `A` records to associate domain hostname with an
+   IPv4 address or `CNAME` to alias the custom domain to the current hostname of
+   the machine).
+3. Run through the configuration CLI tool by executing the following command at
+   the root of the repo:
 
    ```bash
-    docker-compose -f docker-compose.yml -f docker-compose.secret.yml up -d
+    docker compose run --rm cli
    ```
+
+   This will allow you to configure the domain name and email address to use for
+   the Let's Encrypt certificates.
+4. Create a `docker-compose.secret.yml` file to store the secrets used by the
+   configuration. This file is ignored by Git and should never be committed to
+   the repository. The file should contain the following:
+
+   ```yaml
+    # docker-compose.secret.yml
+    version: "3"
+    services:
+     couchdb:
+       environment:
+         - COUCHDB_USER=[ADMIN_USERNAME]
+         - COUCHDB_PASSWORD=[ADMIN_PASSWORD]
+   ```
+
+5. Start the services using the following command:
+
+   ```bash
+    docker-compose -f docker-compose.yml -f docker-compose.oolong.yml -f docker-compose.secret.yml up -d
+   ```
+
+   The `-d` flag will run the services in the background. To see the logs, omit
+   the flag.
 
 ```conf
     # https://docs.couchdb.org/en/stable/best-practices/reverse-proxies.html#reverse-proxying-couchdb-in-a-subdirectory-with-nginx
@@ -24,7 +62,7 @@ The repository is a fork of [evgeniy-khist/letsencrypt-docker-compose](https://g
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-
+    
         proxy_pass http://couchdb$uri;
 
         rewrite ^ $request_uri;

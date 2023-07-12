@@ -1,11 +1,9 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[handlebars]": {
-    "editor.formatOnSave": false
-  },
-  "editor.rulers": [80]
+  "editor.rulers": [
+    80
+  ],
+  "cSpell.words": [
+    "oolong"
+  ]
 }

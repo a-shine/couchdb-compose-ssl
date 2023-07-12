@@ -65,71 +65,11 @@ const askDomain = async (config, domainName) => {
       message: 'What is the RSA key size in bits?',
       default: domainConfig.rsaKeySize || 4096,
     },
-    {
-      type: 'list',
-      name: 'requestHandler',
-      message: 'How do you want to configure Nginx?',
-      choices: [
-        { name: 'Serving static content', value: 'staticContent' },
-        { name: 'Reverse proxy', value: 'reverseProxy' },
-        { name: 'PHP-FPM', value: 'phpFpm' },
-      ],
-    },
   ];
 
   const answers = await inquirer.prompt(questions);
 
   Object.assign(domainConfig, answers);
-
-  if (answers.requestHandler === 'reverseProxy') {
-    const reverseProxyQuestions = [
-      {
-        type: 'confirm',
-        name: 'dockerDns',
-        message:
-          'Does the upstream server run as a Docker container on the same host?',
-        default: domainConfig.dnsResolver
-          ? domainConfig.dnsResolver === dockerDnsResolver
-          : true,
-      },
-      {
-        type: 'input',
-        name: 'upstream',
-        message:
-          'What is the address of the proxied server (e.g. example-backend:8080)?',
-        default: domainConfig.upstream,
-        validate(input) {
-          if (input.length > 0) {
-            return true;
-          }
-          throw Error('Please provide a valid host.');
-        },
-      },
-      {
-        type: 'confirm',
-        name: 'websockets',
-        message: 'Enable WebSocket proxying?',
-        default: domainConfig.websockets ?? false,
-      },
-    ];
-
-    const { dockerDns, upstream, websockets } = await inquirer.prompt(
-      reverseProxyQuestions
-    );
-
-    Object.assign(
-      domainConfig,
-      {
-        upstream,
-        websockets,
-      },
-      dockerDns ? { dnsResolver: dockerDnsResolver } : {}
-    );
-  } else {
-    delete domainConfig.dnsResolver;
-    delete domainConfig.upstream;
-    delete domainConfig.websockets;
-  }
 
   if (!domainName) {
     config.domains.push(domainConfig);
