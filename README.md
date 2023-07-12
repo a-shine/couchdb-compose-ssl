@@ -53,33 +53,3 @@ The repository is built on the fantastic work published at:
 
    The `-d` flag will run the services in the background. To see the logs, omit
    the flag.
-
-```conf
-    # https://docs.couchdb.org/en/stable/best-practices/reverse-proxies.html#reverse-proxying-couchdb-in-a-subdirectory-with-nginx
-    # https://github.com/apache/couchdb-fauxton/issues/1199
-    location /couch {
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    
-        proxy_pass http://couchdb$uri;
-
-        rewrite ^ $request_uri;
-        rewrite ^/couch/(.*) /$1 break;
-        proxy_redirect off;
-        proxy_buffering off;
-    }
-
-     location /_session {
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        proxy_pass http://couchdb/_session;
-
-        proxy_redirect off;
-        proxy_buffering off;
-    }
-```
