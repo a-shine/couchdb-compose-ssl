@@ -3,8 +3,12 @@ version: '3'
 services:
 
   # CouchDB backup service
-  # couchdb-backup:
-  #   image: imageName
+  couchdb-backup:
+    build: ./drive_bk
+    image: ashinebourne/oolong_couchdb_bk
+    volumes:
+      - ./couchdb_data:/opt/couchdb/data
+      - ./credentials.json:/app/credentials.json
 
   # CouchDB backend
   couchdb:
