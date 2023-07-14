@@ -13,19 +13,28 @@ read -p "New user first name: " FIRST_NAME
 read -p "New user last name: " LAST_NAME
 echo
 
+# Ask user for insecure mode setting with a default to secure
+read -p "Do you want to use insecure mode? (y/N): " INSECURE_MODE
+INSECURE_FLAG=""
+if [[ "$INSECURE_MODE" == "y" ]]; then
+  INSECURE_FLAG="--insecure"
+fi
+echo
+
 USER_METADATA='{"first_name": "'$FIRST_NAME'", "last_name": "'$LAST_NAME'"}'
 
 # Create the user document
 USER_DOC='{"_id": "org.couchdb.user:'$USERNAME'", "name": "'$USERNAME'", "password": "'$PASSWORD'", "roles": [], "type": "user", "metadata": '$USER_METADATA'}'
 
+
 # Send a POST request to create the user document
 echo "$COUCHDB_HOST/couch/_users"
-curl --insecure -X POST -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$USER_DOC" "$COUCHDB_HOST/couch/_users"
+curl $INSECURE_FLAG -X POST -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$USER_DOC" "$COUCHDB_HOST/couch/_users"
 
 # Create user tasks database
 USER_DATABASE="userdb-$(echo -n "$USERNAME" | xxd -p)-tasks"
-curl --insecure -X PUT -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "$COUCHDB_HOST/couch/$USER_DATABASE"
+curl $INSECURE_FLAG -X PUT -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "$COUCHDB_HOST/couch/$USER_DATABASE"
 
 # Assign user as a member and administrator of the user database
 MEMBER_DOC='{"admins": {"names": ["'$USERNAME'"], "roles": ["_admin"]}, "members": {"names": ["'$USERNAME'"], "roles": []}}'
-curl --insecure -X PUT -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$MEMBER_DOC" "$COUCHDB_HOST/couch/$USER_DATABASE/_security"
+curl $INSECURE_FLAG -X PUT -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$MEMBER_DOC" "$COUCHDB_HOST/couch/$USER_DATABASE/_security"
