@@ -13,10 +13,10 @@ SOURCE_DATA = "/opt/couchdb/data"
 BACKUP_DIR = "/opt/couchdb_bk"
 
 # Set the ID of the folder in Google Drive where you want to upload the backup
-DRIVE_FOLDER_ID = "1w7BdFFzzYg4w4QNHom_78ZwuAjHgQke1"
+DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 
 # Set the path to your Google Drive API credentials file (JSON format)
-SERVICE_ACCOUNT_CREDENTIALS_FILE = "./credentials.json"
+SERVICE_ACCOUNT_CREDENTIALS_FILE = "/app/credentials.json"
 
 # Define the required OAuth scope(s)
 SCOPES = ["https://www.googleapis.com/auth/drive"]
@@ -63,7 +63,7 @@ def upload_to_google_drive(file_path):
     creds.files().create(body=file_metadata, media_body=media).execute()
 
 
-def cleanup(backup_dir):
+def cleanup_local(backup_dir):
     # Remove the any files in the backup folder older than 3 days
     for f in os.listdir(backup_dir):
         f_path = os.path.join(backup_dir, f)
@@ -71,7 +71,33 @@ def cleanup(backup_dir):
             os.remove(f_path)
 
 
+def cleanup_drive():
+    credentials = authenticate()
+
+    # Load Google Drive API credentials
+    creds = build("drive", "v3", credentials=credentials)
+
+    # List all files in the folder
+    files = (
+        creds.files()
+        .list(
+            q=f"'{DRIVE_FOLDER_ID}' in parents and trashed=false",
+            fields="files(id, name, modifiedTime)",
+        )
+        .execute()
+    )
+
+    # Delete any files older than 3 days
+    for f in files["files"]:
+        modified_time = datetime.datetime.fromisoformat(f["modifiedTime"][:-1])
+        if modified_time < datetime.datetime.now() - datetime.timedelta(days=3):
+            creds.files().delete(fileId=f["id"]).execute()
+
+
 def main():
+    start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{start_time}] Starting backup...")
+
     backup_dir = get_or_create_backup_dir()
 
     try:
@@ -87,9 +113,11 @@ def main():
     print("Backup uploaded successfully.")
 
     print("Cleaning up old backups...")
-    cleanup(backup_dir)
+    cleanup_local(backup_dir)
+    cleanup_drive()
 
-    print("Done.")
+    end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{end_time}] Done.")
 
 
 if __name__ == "__main__":

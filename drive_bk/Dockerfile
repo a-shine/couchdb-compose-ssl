@@ -18,8 +18,6 @@ RUN pip install -r requirements.txt
 
 # Copy the program files to the container
 COPY main.py /app/
-COPY run_backup_job.sh /app/
-RUN chmod +x /app/run_backup_job.sh
 
 # Give execution rights to the cron job
 RUN chmod 0644 /etc/cron.d/backup-cron
@@ -31,4 +29,5 @@ RUN crontab /etc/cron.d/backup-cron
 RUN touch /var/log/cron.log
 
 # Run cron in the foreground
+# https://stackoverflow.com/questions/65884276/missing-environment-variables-on-running-python-cronjob-in-docker
 CMD printenv > /etc/environment && cron && tail -f /var/log/cron.log
