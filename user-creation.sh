@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Make sure to use route domain as the script appends the /couch path!
 read -p "CouchDB host (e.g., http://localhost:5984): " COUCHDB_HOST
 read -p "Admin username: " ADMIN_USERNAME
 read -s -p "Admin password: " ADMIN_PASSWORD
@@ -32,9 +33,17 @@ echo "$COUCHDB_HOST/couch/_users"
 curl $INSECURE_FLAG -X POST -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$USER_DOC" "$COUCHDB_HOST/couch/_users"
 
 # Create user tasks database
-USER_DATABASE="userdb-$(echo -n "$USERNAME" | xxd -p)-tasks"
-curl $INSECURE_FLAG -X PUT -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "$COUCHDB_HOST/couch/$USER_DATABASE"
+USER_TASK_DATABASE="userdb-$(echo -n "$USERNAME" | xxd -p)-tasks"
+curl $INSECURE_FLAG -X PUT -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "$COUCHDB_HOST/couch/$USER_TASK_DATABASE"
 
-# Assign user as a member and administrator of the user database
+# Create user workspace database
+USER_WORKSPACE_DATABASE="userdb-$(echo -n "$USERNAME" | xxd -p)-workspaces"
+curl $INSECURE_FLAG -X PUT -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" "$COUCHDB_HOST/couch/$USER_WORKSPACE_DATABASE"
+
+# Assign user as a member and administrator of the user's task database
 MEMBER_DOC='{"admins": {"names": ["'$USERNAME'"], "roles": ["_admin"]}, "members": {"names": ["'$USERNAME'"], "roles": []}}'
-curl $INSECURE_FLAG -X PUT -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$MEMBER_DOC" "$COUCHDB_HOST/couch/$USER_DATABASE/_security"
+curl $INSECURE_FLAG -X PUT -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$MEMBER_DOC" "$COUCHDB_HOST/couch/$USER_TASK_DATABASE/_security"
+
+# Assign user as a member and administrator of the user's workspace database
+MEMBER_DOC='{"admins": {"names": ["'$USERNAME'"], "roles": ["_admin"]}, "members": {"names": ["'$USERNAME'"], "roles": []}}'
+curl $INSECURE_FLAG -X PUT -H "Content-Type: application/json" -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -d "$MEMBER_DOC" "$COUCHDB_HOST/couch/$USER_WORKSPACE_DATABASE/_security"

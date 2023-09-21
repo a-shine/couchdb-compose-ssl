@@ -93,3 +93,5 @@ Run the following interactive script to create a new user:
 ```bash
 ./create-user.sh
 ```
+
+BUG: Don't seem to be able to access the Fauxton UI (https://{URL}/couch/_utils/#login) unless from firefox or chrome incognito mode.
